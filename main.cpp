@@ -61,6 +61,7 @@ public:
     void setPosition(sf::Vector2f pos);
     void select();
     void rotate(float angle);
+    void unrotate();
     int getPoints();
     int getId();
     int getColor();
@@ -116,6 +117,10 @@ void Card::rotate(float angle) {
     card_img.setRotation(angle);
 }
 
+void Card::unrotate() {
+    card_img.setRotation(0);
+}
+
 float Card::getRotation() {
     return card_img.getRotation();
 }
@@ -157,8 +162,8 @@ sf::Vector2f Card::getPosition() {
     return this->card_img.getPosition();
 }
 
-//TO DO NEXT :  ogólnie raczej game class koñczenie
-
+//TO DO NEXT :  ogÃ³lnie raczej game class koÅ„czenie
+//pokazywanie eventÃ³w - ciagniecie karty itp w text selekcie jest test(scroll?),
 
 class Player {
 private:
@@ -194,6 +199,7 @@ public:
     void move(sf::Event& event, sf::RenderWindow& window, int& player_pointer,int&taskflag);
     void mouse(sf::Event& event, sf::RenderWindow& window);
 
+    void setCardid(int&in_cardid);
     void reset();
     void window_draw_hand(sf::RenderWindow& window);
     int getSizeHand();
@@ -293,7 +299,7 @@ void Player::mouse(sf::Event& event, sf::RenderWindow& window) {
     mouse_flag = -1;
     if (mouse_delay.getElapsedTime().asSeconds() > 0.2) {
         if (event.type == sf::Event::MouseButtonPressed) {
-            switch (team) {
+            switch (id) {
             case 0:
                 std::cout << "PLAYER1\n";
                 if (event.key.code == sf::Mouse::Left) {
@@ -325,6 +331,10 @@ void Player::mouse(sf::Event& event, sf::RenderWindow& window) {
                     else if ((mouse_pos_x > 805 && mouse_pos_x < 899) && (mouse_pos_y > 350 && mouse_pos_y < 800)) {
                         mouse_flag = 5;
                     }
+                    //open eventbook
+                    else if ((mouse_pos_x>1650&&mouse_pos_x<1800)&&(mouse_pos_y>842&&mouse_pos_y<900)) {
+                        mouse_flag = 6;
+                    }
                 }
                 //reset 
                 else if (event.key.code == sf::Mouse::Right) {
@@ -340,7 +350,105 @@ void Player::mouse(sf::Event& event, sf::RenderWindow& window) {
                 break;
 
             case 1:
-                std::cout << "PLAYER2\n";
+                if (duel) {
+                    std::cout << "PLAYER2\n";
+                    if (event.key.code == sf::Mouse::Left) {
+                        mouse_pos_x = sf::Mouse::getPosition(window).x;
+                        mouse_pos_y = sf::Mouse::getPosition(window).y;
+                        std::cout << mouse_pos_x << " " << mouse_pos_y << "\n";
+                        //draw card 
+                        if ((mouse_pos_x > 908 && mouse_pos_x < 1001) && (mouse_pos_y < 483 && mouse_pos_y>349)) {
+                            mouse_flag = 0;
+
+                        }
+                        //from discarded
+                        else if ((mouse_pos_x > 909 && mouse_pos_x < 1003) && (mouse_pos_y > 550 && mouse_pos_y < 683)) {
+                            mouse_flag = 1;
+
+                        }
+                        //select card
+                        else if (((mouse_pos_x > screenbounds(960 - 47 * (hand.size() / 2))) && (mouse_pos_x < screenbounds((960 - 47 * (hand.size() / 2) + 47 * hand.size() + 47)))) && mouse_pos_y < 182) {
+                            mouse_flag = 2;
+
+                        }
+                        //playfield add
+                        else if ((mouse_pos_x > 1920 - 789 && mouse_pos_x < 1920 - 115) && (mouse_pos_y > 138 && mouse_pos_y < 854)) {
+                            mouse_flag = 3;
+
+                        }
+                        //add to closed
+                        else if ((mouse_pos_x > 1920 - 899 && mouse_pos_x < 1920 - 805) && (mouse_pos_y > 350 && mouse_pos_y < 800)) {
+                            mouse_flag = 5;
+                        }
+                        //open eventbook
+                        else if ((mouse_pos_x > 1650 && mouse_pos_x < 1800) && (mouse_pos_y > 842 && mouse_pos_y < 900)) {
+                            mouse_flag = 6;
+                        }
+                    }
+                    //reset 
+                    else if (event.key.code == sf::Mouse::Right) {
+                        mouse_pos_x = sf::Mouse::getPosition(window).x;
+                        mouse_pos_y = sf::Mouse::getPosition(window).y;
+                        if ((mouse_pos_x > 1920 - 789 && mouse_pos_x < 1920 - 115) && (mouse_pos_y > 138 && mouse_pos_y < 854)) {
+                            mouse_flag = 4;
+
+                        }
+
+                    }
+                    mouse_delay.restart();
+                    break;
+                }
+                //SECOND PLAYER IN 4 PLAYERS GAME
+                else {
+                    std::cout << "PLAYER2\n";
+                    if (event.key.code == sf::Mouse::Left) {
+                        mouse_pos_x = sf::Mouse::getPosition(window).x;
+                        mouse_pos_y = sf::Mouse::getPosition(window).y;
+                        std::cout << mouse_pos_x << " " << mouse_pos_y << "\n";
+                        //draw card 
+                        if ((mouse_pos_x > 908 && mouse_pos_x < 1001) && (mouse_pos_y < 483 && mouse_pos_y>349)) {
+                            mouse_flag = 0;
+
+                        }
+                        //from discarded
+                        else if ((mouse_pos_x > 909 && mouse_pos_x < 1003) && (mouse_pos_y > 550 && mouse_pos_y < 683)) {
+                            mouse_flag = 1;
+
+                        }
+                        //select card
+                        else if (((mouse_pos_y > screenbounds(540 - 35 * (hand.size() / 2) - 67)) && (mouse_pos_y < screenbounds(540 - 35 * (hand.size() / 2) - 67 + 35*hand.size()+20))) && mouse_pos_x < 120) {
+                            mouse_flag = 2;
+
+                        }
+                        //playfield add
+                        else if ((mouse_pos_x > 1920 - 789 && mouse_pos_x < 1920 - 115) && (mouse_pos_y > 138 && mouse_pos_y < 842)) {
+                            mouse_flag = 3;
+
+                        }
+                        //add to closed
+                        else if ((mouse_pos_x > 1920 - 899 && mouse_pos_x < 1920 - 805) && (mouse_pos_y > 350 && mouse_pos_y < 800)) {
+                            mouse_flag = 5;
+                        }
+                        //open eventbook
+                        else if ((mouse_pos_x > 1650 && mouse_pos_x < 1800) && (mouse_pos_y > 842 && mouse_pos_y < 900)) {
+                            mouse_flag = 6;
+                        }
+                    }
+                    //reset 
+                    else if (event.key.code == sf::Mouse::Right) {
+                        mouse_pos_x = sf::Mouse::getPosition(window).x;
+                        mouse_pos_y = sf::Mouse::getPosition(window).y;
+                        if ((mouse_pos_x > 1920 - 789 && mouse_pos_x < 1920 - 115) && (mouse_pos_y > 138 && mouse_pos_y < 842)) {
+                            mouse_flag = 4;
+
+                        }
+
+                    }
+                    mouse_delay.restart();
+                    break;
+                }
+            case 2:
+                std::cout << "PLAYER3\n";
                 if (event.key.code == sf::Mouse::Left) {
                     mouse_pos_x = sf::Mouse::getPosition(window).x;
                     mouse_pos_y = sf::Mouse::getPosition(window).y;
@@ -361,20 +469,24 @@ void Player::mouse(sf::Event& event, sf::RenderWindow& window) {
 
                     }
                     //playfield add
-                    else if ((mouse_pos_x > 1920-789 && mouse_pos_x < 1920-115) && (mouse_pos_y > 138 && mouse_pos_y < 854)) {
+                    else if ((mouse_pos_x > 115 && mouse_pos_x < 789) && (mouse_pos_y > 138 && mouse_pos_y < 854)) {
                         mouse_flag = 3;
 
                     }
                     //add to closed
-                    else if ((mouse_pos_x > 1920-899 && mouse_pos_x < 1920-805) && (mouse_pos_y > 350 && mouse_pos_y < 800)) {
+                    else if ((mouse_pos_x > 1920 - 899 && mouse_pos_x < 1920 - 805) && (mouse_pos_y > 350 && mouse_pos_y < 800)) {
                         mouse_flag = 5;
+                    }
+                    //open eventbook
+                    else if ((mouse_pos_x > 1650 && mouse_pos_x < 1800) && (mouse_pos_y > 842 && mouse_pos_y < 900)) {
+                        mouse_flag = 6;
                     }
                 }
                 //reset 
                 else if (event.key.code == sf::Mouse::Right) {
                     mouse_pos_x = sf::Mouse::getPosition(window).x;
                     mouse_pos_y = sf::Mouse::getPosition(window).y;
-                    if ((mouse_pos_x > 1920-789 && mouse_pos_x < 1920-115) && (mouse_pos_y > 138 && mouse_pos_y < 854)) {
+                    if ((mouse_pos_x > 115 && mouse_pos_x < 789) && (mouse_pos_y > 138 && mouse_pos_y < 854)) {
                         mouse_flag = 4;
 
                     }
@@ -383,9 +495,59 @@ void Player::mouse(sf::Event& event, sf::RenderWindow& window) {
                 mouse_delay.restart();
                 break;
 
+            case 3:
+                std::cout << "PLAYER4\n";
+                if (event.key.code == sf::Mouse::Left) {
+                    mouse_pos_x = sf::Mouse::getPosition(window).x;
+                    mouse_pos_y = sf::Mouse::getPosition(window).y;
+                    std::cout << mouse_pos_x << " " << mouse_pos_y << "\n";
+                    //draw card 
+                    if ((mouse_pos_x > 908 && mouse_pos_x < 1001) && (mouse_pos_y < 483 && mouse_pos_y>349)) {
+                        mouse_flag = 0;
+
+                    }
+                    //from discarded
+                    else if ((mouse_pos_x > 909 && mouse_pos_x < 1003) && (mouse_pos_y > 550 && mouse_pos_y < 683)) {
+                        mouse_flag = 1;
+
+                    }
+                    //select card
+                    else if (((mouse_pos_y > screenbounds(540 - 35 * (hand.size() / 2) - 67)) && (mouse_pos_y < screenbounds(540 - 35 * (hand.size() / 2) - 67 + 35 * hand.size() + 20))) && mouse_pos_x > 1780) {
+                        mouse_flag = 2;
+
+                    }
+                    //playfield add
+                    else if ((mouse_pos_x > 1920 - 789 && mouse_pos_x < 1920 - 115) && (mouse_pos_y > 138 && mouse_pos_y < 842)) {
+                        mouse_flag = 3;
+
+                    }
+                    //add to closed
+                    else if ((mouse_pos_x > 1920 - 899 && mouse_pos_x < 1920 - 805) && (mouse_pos_y > 350 && mouse_pos_y < 800)) {
+                        mouse_flag = 5;
+                    }
+                    //open eventbook
+                    else if ((mouse_pos_x > 1650 && mouse_pos_x < 1800) && (mouse_pos_y > 842 && mouse_pos_y < 900)) {
+                        mouse_flag = 6;
+                    }
+                }
+                //reset 
+                else if (event.key.code == sf::Mouse::Right) {
+                    mouse_pos_x = sf::Mouse::getPosition(window).x;
+                    mouse_pos_y = sf::Mouse::getPosition(window).y;
+                    if ((mouse_pos_x > 1920 - 789 && mouse_pos_x < 1920 - 115) && (mouse_pos_y > 138 && mouse_pos_y < 842)) {
+                        mouse_flag = 4;
+
+                    }
+
+                }
+                mouse_delay.restart();
+                break;
+                break;
             }
 
+
         }
+
     }
 
 }
@@ -404,28 +566,19 @@ void Player::move(sf::Event& event, sf::RenderWindow& window,int &player_pointer
         bool playfield_add = false;
         int counter_norm_id = 0;
         int counter_jok_id = 0;
-        int cardid = int((mouse_pos_x - (960 - 47 * (hand.size() / 2))) / 47);
+        int cardid = 0;
+        setCardid(cardid);
+        
         switch(mouse_flag){
 
         case 0:
             std::cout << "\ncase0\n";
             if (draw_card_bool == true) {
-                //if top is red 3 draw one more
-                if (deck[0].back().getId() == 3 && (deck[0].back().getColor() == 0 || deck[0].back().getColor() == 2)) {
-                    thirds[team].push_back(deck[0].back());
-                    deck[0].pop_back();
-                    first_move = false;
-                    delay.restart();
-                }
-                //else draw normally
-                else {
-                    hand.push_back(deck[0].back());
-                    deck[0].pop_back();
-                    sort_hand();
-                    delay.restart();
-                    first_move = false;
-                    draw_card_bool = false;
-                }
+                
+                draw_card();
+                sort_hand();
+                first_move = false;
+                draw_card_bool = false;
 
             }
             break;
@@ -477,6 +630,8 @@ void Player::move(sf::Event& event, sf::RenderWindow& window,int &player_pointer
                 }
                 //finish game
                 if (hand.size() == 1 && closed[team].size() > 0) {
+                    //unrotate
+                    selected_cards.back().unrotate();
                     discarded[0].push_back(selected_cards.back());
                     for (int i = 0; i < hand.size(); i++) {
                         if (hand[i].getSelected() == true) {
@@ -492,7 +647,8 @@ void Player::move(sf::Event& event, sf::RenderWindow& window,int &player_pointer
                     if (selected_cards.back().getId() == 2 || selected_cards.back().getId() == 0) {
                         key_bools->block = true;
                     }
-
+                    //unrotate
+                    selected_cards.back().unrotate();
                     discarded[0].push_back(selected_cards.back());
                     for (int i = 0; i < hand.size(); i++) {
                         if (hand[i].getSelected() == true) {
@@ -501,10 +657,20 @@ void Player::move(sf::Event& event, sf::RenderWindow& window,int &player_pointer
                     }
                     selected_cards.clear();
                     player_pointer++;
-                    if (player_pointer == 2) {
+                    int number_players = 4;
+                    if (duel) {
+                        number_players = 2;
+                    }
+                    if (player_pointer == number_players) {
                         player_pointer = 0;
                     }
                     draw_card_bool = true;
+                    //empty deck
+                    if (deck[0].size() == 0) {
+                        taskflag = 2;
+                    }
+
+
                 }
                 next_move = true;
                 discarded[0].back().select();
@@ -516,14 +682,26 @@ void Player::move(sf::Event& event, sf::RenderWindow& window,int &player_pointer
         case 2:
             std::cout << "\ncase2\n";
             if (draw_card_bool == false) {
+                //edge card idselection
+                if (duel || (!duel && id == 2)) {
+                    if (mouse_pos_x > hand[hand.size() - 1].getPosition().x && mouse_pos_x < hand[hand.size() - 1].getPosition().x + 94) {
 
-                if (mouse_pos_x > hand[hand.size() - 1].getPosition().x && mouse_pos_x < hand[hand.size() - 1].getPosition().x + 94) {
-
-                    cardid = hand.size() - 1;
-
+                        cardid = hand.size() - 1;
+                        std::cout << "czemu tu";
+                    }
                 }
-                //switch after team, positions of cards
-                switch (team) {
+                
+                else {
+                    if (mouse_pos_y > hand[hand.size() - 1].getPosition().y && mouse_pos_y < hand[hand.size() - 1].getPosition().y + 94) {
+
+                        cardid = hand.size() - 1;
+                        std::cout << "handsize -1 : " << cardid << "\n";
+
+                    }
+                }
+                //switch after id, positions of cards
+                
+                switch (id) {
                 case 0:
                     if (hand[cardid].getSelected() == true && mouse_pos_y > 870) {
                         hand[cardid].select();
@@ -565,6 +743,97 @@ void Player::move(sf::Event& event, sf::RenderWindow& window,int &player_pointer
                     }
                     break;
                 case 1:
+                    if (duel) {
+                        if (hand[cardid].getSelected() == true && mouse_pos_y < 182) {
+                            hand[cardid].select();
+
+                            //remove from selected vector
+                            for (int i = 0; i < selected_cards.size(); i++) {
+                                if (selected_cards[i].getPosition().x == hand[cardid].getPosition().x) {
+                                    selected_cards.erase(selected_cards.begin() + i);
+                                }
+                            }
+
+                        }
+                        else if (mouse_pos_y < 132 && ((selected_cards.size() < hand.size() - 1 || hand.size() == 1) || (selected_cards.size() == hand.size() - 1 && boughtdraw))) {
+                            if (selected_cards.size() == 0) {
+                                hand[cardid].select();
+                                //add to selected vector
+                                selected_cards.push_back(hand[cardid]);
+                            }
+                            else {
+                                bool add = false;
+                                for (int i = 0; i < selected_cards.size(); i++) {
+                                    //if 2 or joker or same id card then true
+                                    if (selected_cards[i].getId() == 2 || selected_cards[i].getId() == 0 || selected_cards[i].getId() == hand[cardid].getId() || hand[cardid].getId() == 2 || hand[cardid].getId() == 0) {
+                                        add = true;
+                                    }
+                                    //else false and break from for loop
+                                    else {
+                                        add = false;
+                                        break;
+                                    }
+                                }
+                                if (add == true) {
+                                    hand[cardid].select();
+                                    //add to selected vector
+                                    selected_cards.push_back(hand[cardid]);
+                                }
+
+                            }
+
+                        }
+
+
+                        break;
+                    }
+                    //second player in 4 players game
+                    else {
+                        std::cout << "TU WCHODZI " << cardid;
+                        if (hand[cardid].getSelected() == true && mouse_pos_x < 120) {
+                            hand[cardid].select();
+
+                            //remove from selected vector
+                            for (int i = 0; i < selected_cards.size(); i++) {
+                                if (selected_cards[i].getPosition().y == hand[cardid].getPosition().y) {
+                                    selected_cards.erase(selected_cards.begin() + i);
+                                }
+                            }
+
+                        }
+                        else if (mouse_pos_x < 100 && ((selected_cards.size() < hand.size() - 1 || hand.size() == 1) || (selected_cards.size() == hand.size() - 1 && boughtdraw))) {
+                            if (selected_cards.size() == 0) {
+                                hand[cardid].select();
+                                //add to selected vector
+                                selected_cards.push_back(hand[cardid]);
+                            }
+                            else {
+                                bool add = false;
+                                for (int i = 0; i < selected_cards.size(); i++) {
+                                    //if 2 or joker or same id card then true
+                                    if (selected_cards[i].getId() == 2 || selected_cards[i].getId() == 0 || selected_cards[i].getId() == hand[cardid].getId() || hand[cardid].getId() == 2 || hand[cardid].getId() == 0) {
+                                        add = true;
+                                    }
+                                    //else false and break from for loop
+                                    else {
+                                        add = false;
+                                        break;
+                                    }
+                                }
+                                if (add == true) {
+                                    hand[cardid].select();
+                                    //add to selected vector
+                                    selected_cards.push_back(hand[cardid]);
+                                }
+
+                            }
+
+                        }
+
+
+                        break;
+                    }
+                case 2:
                     if (hand[cardid].getSelected() == true && mouse_pos_y < 182) {
                         hand[cardid].select();
 
@@ -602,11 +871,56 @@ void Player::move(sf::Event& event, sf::RenderWindow& window,int &player_pointer
                             }
 
                         }
+
                     }
                     break;
+
+                case 3:
+                    std::cout << "TU WCHODZI " << cardid;
+                    if (hand[hand.size() - 1 - cardid].getSelected() == true && mouse_pos_x > 1800) {
+                        hand[hand.size() - 1 - cardid].select();
+
+                        //remove from selected vector
+                        for (int i = 0; i < selected_cards.size(); i++) {
+                            if (selected_cards[i].getPosition().y == hand[hand.size() - 1 - cardid].getPosition().y) {
+                                selected_cards.erase(selected_cards.begin() + i);
+                            }
+                        }
+
+                    }
+                    else if (mouse_pos_x > 1820 && ((selected_cards.size() < hand.size() - 1 || hand.size() == 1) || (selected_cards.size() == hand.size() - 1 && boughtdraw))) {
+                        if (selected_cards.size() == 0) {
+                            hand[hand.size() - 1 - cardid].select();
+                            //add to selected vector
+                            selected_cards.push_back(hand[hand.size() - 1 - cardid]);
+                        }
+                        else {
+                            bool add = false;
+                            for (int i = 0; i < selected_cards.size(); i++) {
+                                //if 2 or joker or same id card then true
+                                if (selected_cards[i].getId() == 2 || selected_cards[i].getId() == 0 || selected_cards[i].getId() == hand[hand.size() - 1 - cardid].getId() || hand[hand.size() - 1 - cardid].getId() == 2 || hand[hand.size() - 1 - cardid].getId() == 0) {
+                                    add = true;
+                                }
+                                //else false and break from for loop
+                                else {
+                                    add = false;
+                                    break;
+                                }
+                            }
+                            if (add == true) {
+                                hand[hand.size() - 1 - cardid].select();
+                                //add to selected vector
+                                selected_cards.push_back(hand[hand.size() - 1 - cardid]);
+                            }
+
+                        }
+
+                    }
+                    break;
+
+
                 }
-
-
+                
                 window_draw_hand(window);
 
             }
@@ -670,6 +984,8 @@ void Player::move(sf::Event& event, sf::RenderWindow& window,int &player_pointer
                                     if (boughtdraw) {
                                         if (!key_bools->block) {
                                             for (int k = 0; k < selected_cards.size(); k++) {
+                                                //unrotate
+                                                selected_cards[k].unrotate();
                                                 playfield[0][team][i].push_back(selected_cards[k]);
                                             }
                                             append = true;
@@ -687,6 +1003,8 @@ void Player::move(sf::Event& event, sf::RenderWindow& window,int &player_pointer
                                     }
                                     else {
                                         for (int k = 0; k < selected_cards.size(); k++) {
+                                            //unrotate
+                                            selected_cards[k].unrotate();
                                             playfield[0][team][i].push_back(selected_cards[k]);
                                         }
                                         append = true;
@@ -738,6 +1056,9 @@ void Player::move(sf::Event& event, sf::RenderWindow& window,int &player_pointer
                             }
                         }
                         if (playfield_add == true) {
+                            for (int i = 0; i < selected_cards.size(); i++) {
+                                selected_cards[i].unrotate();
+                            }
                             playfield[0][team].push_back(selected_cards);
                             selected_cards.clear();
                             int handsize = 0;
@@ -761,7 +1082,13 @@ void Player::move(sf::Event& event, sf::RenderWindow& window,int &player_pointer
                 boughtdraw = false;
                 key_bools->block = false;
                 while (discarded[0].size() != 0) {
-                    hand.push_back(discarded[0].back());
+                    //if 3 add to thirds else add to hand
+                    if (discarded[0].back().getId() == 3 && (discarded[0].back().getColor() == 0 || discarded[0].back().getColor() == 2)) {
+                        thirds[team].push_back(discarded[0].back());
+                    }
+                    else {
+                        hand.push_back(discarded[0].back());
+                    }
                     discarded[0].pop_back();
                 }
                 sort_hand();
@@ -799,6 +1126,7 @@ void Player::move(sf::Event& event, sf::RenderWindow& window,int &player_pointer
                         }
                     }
                     discarded[0].push_back(bought);
+                    selected_cards.clear();
                     draw_card_bool = true;
 
                 }
@@ -828,6 +1156,8 @@ void Player::move(sf::Event& event, sf::RenderWindow& window,int &player_pointer
                         for (int k = 0; k < closed[team][j].size(); k++) {
                             if (closed[team][j][k].getId() == canasta_id) {
                                 for (int s = 0; s < selected_cards.size(); s++) {
+                                    //unrotate
+                                    selected_cards[s].unrotate();
                                     closed[team][j].push_back(selected_cards[s]);
                                     
                                 }
@@ -849,6 +1179,9 @@ void Player::move(sf::Event& event, sf::RenderWindow& window,int &player_pointer
             }
 
             break;
+        case 6:
+            taskflag = 3;
+            break;
         }
        
 
@@ -857,12 +1190,34 @@ void Player::move(sf::Event& event, sf::RenderWindow& window,int &player_pointer
     }
 }
 
+void Player::setCardid(int& in_cardid) {
+    //to identify the card on hand
+    if (duel || (!duel && (id == 2||id==0))) {
+        in_cardid = int((mouse_pos_x - (960 - 47 * (hand.size() / 2))) / 47);
+        if (in_cardid >= hand.size()) {
+            in_cardid = hand.size() - 1;
+        }
+    }
+    else {
+        in_cardid = int((mouse_pos_y - (540 - 35 * (hand.size() / 2) - 67 ))/32.5);
+        if (id == 3) {
+            in_cardid = int((mouse_pos_y - (540 - 35 * (hand.size() / 2)-11)) / 32.5);
+            in_cardid = hand.size() - 1 - in_cardid;
+        }
+        if (in_cardid >= hand.size()) {
+            in_cardid = hand.size()-1;
+        }
+        
+        //std::cout << "ID - " << (mouse_pos_y - (540 - 35 * (hand.size() / 2) - 67)) << "\n";
+    }
+}
+
 void Player::reset() {
     hand.clear();
     selected_cards.clear();
     draw_card_bool = true;
 }
-//wybieranie kart z reki na 4 graczy, PRZEDE WSZYSTKIM ROTACJA KART rêka -> stó³/odrzucone
+
 void Player::window_draw_hand(sf::RenderWindow& window) {
     switch (id) {
     case 0:
@@ -904,6 +1259,7 @@ void Player::window_draw_hand(sf::RenderWindow& window) {
                 }
                 hand[i].wind_draw(window);
             }
+            //std::cout << "POZYCJE KART y - " << hand[0].getPosition().y << " druga - " << hand[1].getPosition().y << "\n";
         }
         break;
 
@@ -920,18 +1276,19 @@ void Player::window_draw_hand(sf::RenderWindow& window) {
         break;
 
     case 3:
+        //bylo handsize - 1 -i
         for (int i = 0; i < hand.size(); i++) {
-            if (!hand[hand.size() - 1 - i].getSelected()) {
-                hand[hand.size() - 1 - i].setPosition(sf::Vector2f(1820, 540 - 35 * (hand.size() / 2)+47 + i * 35));
+            if (!hand[i].getSelected()) {
+                hand[i].setPosition(sf::Vector2f(1820, 540 - 35 * (hand.size() / 2)+47 + i * 35));
 
             }
             else {
-                hand[hand.size() - 1 - i].setPosition(sf::Vector2f(1780, 540 - 35 * (hand.size() / 2)+47 + i * 35));
+                hand[i].setPosition(sf::Vector2f(1780, 540 - 35 * (hand.size() / 2)+47 + i * 35));
             }
-            if (hand[hand.size() - 1 - i].getRotation() != 270) {
-                hand[hand.size() - 1 - i].rotate(270);
+            if (hand[i].getRotation() != 270) {
+                hand[i].rotate(270);
             }
-            hand[i].wind_draw(window);
+            hand[hand.size() - 1 - i].wind_draw(window);
         }
         break;
 
@@ -964,8 +1321,8 @@ bool Player::playfield_points_check() {
             pts += playfield[0][team][i][j].getPoints();
         }
     }
-    if (pts >= key_bools->points_thresholds[id]) {
-        key_bools->playfield_confirmed[id] = true;
+    if (pts >= key_bools->points_thresholds[team]) {
+        key_bools->playfield_confirmed[team] = true;
         std::cout << "DWA";
         return true;
     }
@@ -1123,7 +1480,7 @@ void Interface::update(int deck_size) {
 }
 
 void Interface::draw(sf::RenderWindow& window) {
-   //125 118 start, +105 next 6 w jednej linii +30 w pionie do 268 - 6 karta,+150 w pionie od 7 karty na now¹ kupkê, ostatnia kolumna zostawiona na zamkniête, druga po³owa sto³u zaczyna siê od 1165
+   //125 118 start, +105 next 6 w jednej linii +30 w pionie do 268 - 6 karta,+150 w pionie od 7 karty na nowÄ… kupkÄ™, ostatnia kolumna zostawiona na zamkniÄ™te, druga poÅ‚owa stoÅ‚u zaczyna siÄ™ od 1165
    /* Card karta(cards_texture, 3, 0);
     Card karta2(cards_texture, 3, 1);
     karta.setPosition(sf::Vector2f(1165, 550));
@@ -1160,7 +1517,7 @@ void Interface::draw(sf::RenderWindow& window) {
     
 }
 
-//powrót do menu
+
 
 class Game {
 private:
@@ -1180,6 +1537,8 @@ private:
     int number_players;
     int points[2];
     keys key_bools;
+    int testowa;
+    bool first_game;
 
     sf::RenderWindow* window;
     sf::RectangleShape background1;
@@ -1189,6 +1548,7 @@ private:
     sf::Clock mouse_delay;
     sf::Text* mainscreen_texts;
     sf::Text title;
+    sf::Text info;
     sf::Texture menu_texture;
     sf::Texture table_screen_txt;
     sf::Font font;
@@ -1209,11 +1569,14 @@ public:
     void close_canasta();
     void reset();
     void count_points();
+    void eventbook(sf::Event& event);
 
     //menu
     void menu();
     void menu_draw();
     void text_select(sf::Event&event);
+    void players_choice(sf::Event& event);
+    void start_new_game();
 
     //other
     void wind_draw();
@@ -1223,8 +1586,9 @@ public:
 
 Game::Game() {
     playfield.resize(2);
+    first_game = true;
     
-    
+    testowa = 100;
     
     interface = new Interface(discarded, playfield,thirds,closed_interface);
 
@@ -1246,15 +1610,7 @@ Game::Game() {
     key_bools.points_thresholds[0] = 50;
     key_bools.points_thresholds[1] = 50;
     key_bools.block = false;
-    for (int i = 0; i < number_players; i++) {
-
-        if (number_players == 2) {
-            players[i] = Player(deck, discarded, playfield, thirds, closed, i, true,key_bools, cards_texture);
-        }
-        else {
-            players[i] = Player(deck, discarded, playfield, thirds, closed, i, false,key_bools, cards_texture);
-        }
-    }
+   
         
     taskflag = 0;
     player_pointer = 0;
@@ -1295,6 +1651,14 @@ Game::Game() {
     title.setOutlineColor(sf::Color::Black);
     title.setOutlineThickness(3);
     title.setPosition(sf::Vector2f(500, 30));
+
+    info.setCharacterSize(40);
+    info.setString("EVENTS");
+    info.setFillColor(sf::Color(255, 255, 255));
+    info.setFont(font);
+    info.setOutlineColor(sf::Color::Black);
+    info.setOutlineThickness(3);
+    info.setPosition(sf::Vector2f(1650, 920));
     
     
     table_screen_txt.loadFromFile("Resources/table_screen.png");
@@ -1387,7 +1751,7 @@ void Game::wind_draw() {
     for (int i = 0; i < number_players; i++) {
         players[i].window_draw_hand(*window);
     }
-
+    window->draw(info);
     
 }
 
@@ -1398,7 +1762,7 @@ void Game::start() {
 
     discarded.push_back(deck.back());
     deck.pop_back();
-    
+
     players[global_player_pointer].setFirstMoveBoolTrue();
     
     interface->update(deck.size());
@@ -1406,10 +1770,7 @@ void Game::start() {
         players[i].sort_hand();
     }
  
-    
-
-    
-
+    first_game = false;
     taskflag = 1;
 }
 
@@ -1468,11 +1829,26 @@ void Game::tasking(sf::Event& event) {
         players[player_pointer].move(event, *window, player_pointer,taskflag);
         interface->update(deck.size());
         close_canasta();
+        wind_draw();
         break;
     case 2:
         //finish game
-        reset();
-        start();
+        count_points();
+
+        if (points[0] <= 5000 && points[1] <= 5000) {
+            reset();
+            taskflag = 0;
+        }
+        else {
+            menuflag = 5;
+            taskflag = 0;
+            first_game = true;
+        }
+        break;
+    case 3:
+        //eventbook
+        wind_draw();
+        eventbook(event);
         break;
 
     }
@@ -1487,13 +1863,21 @@ void Game::tasking(sf::Event& event) {
 }
 
 void Game::reset() {
-    count_points();
 
     global_player_pointer++;
     if (global_player_pointer >= number_players) {
         global_player_pointer = 0;
     }
     player_pointer = global_player_pointer;
+
+    if (points[0] >= 5000 || points[1] >= 5000) {
+        points[0] = 0;
+        points[1] = 0;
+        global_player_pointer = 0;
+        player_pointer = 0;
+    }
+
+
 
     deck.clear();
     discarded.clear();
@@ -1505,7 +1889,9 @@ void Game::reset() {
     closed_interface[1].clear();
     std::cout << "CLOSEDinterace PRZESZLO";
     closed[0].clear();
+    closed[0].resize(0);
     closed[1].clear();
+    closed[1].resize(0);
     std::cout << "CLOSED PRZESZLO";
     playfield[0].clear();
     playfield[1].clear();
@@ -1591,16 +1977,38 @@ void Game::count_points() {
     for (int i = 0; i < number_players; i++) {
         std::vector<Card> handcards = players[i].getHand();
         for (int j = 0; j < players[i].getSizeHand(); j++) {
+
+
             if (handcards[j].getPoints() != -100) {
-                points[i%2] -= handcards[j].getPoints();
+                points[i % 2] -= handcards[j].getPoints();
             }
             else {
-                points[i%2] += handcards[j].getPoints();
+                points[i % 2] += handcards[j].getPoints();
             }
+        
+
         }
     }
     std::cout << "trzy";
     std::cout << "pierwsza druzyna - " << points[0] << " druga druzyna - " << points[1] << "\n";
+}
+
+void Game::eventbook(sf::Event& event) {
+    sf::RectangleShape* ev_background = new sf::RectangleShape;
+    ev_background->setSize(sf::Vector2f(1400, 800));
+    ev_background->setPosition(sf::Vector2f(250, 100));
+    ev_background->setFillColor(sf::Color::Blue);
+    window->draw(*ev_background);
+
+    if (mouse_delay.getElapsedTime().asSeconds() > 0.2) {
+        if (event.type == sf::Event::MouseButtonPressed) {
+            if (event.key.code == sf::Mouse::Right) {
+                taskflag = 1;
+            }
+        }
+    }
+
+    delete ev_background;
 }
 
 void Game::menu() {
@@ -1620,24 +2028,47 @@ void Game::menu() {
 
         case 0:
             //startscreen
-            text_select(event);
             menu_draw();
+            text_select(event);
+            
             
             break;
         case 1:
-            //play
-            tasking(event);
-            wind_draw();
+            //choosing number of players
+            players_choice(event);
             break;
         case 2:
             //load
+            if (!first_game) {
+                menuflag = 6;
+            }
+            else {
+                menuflag = 0;
+            }
             break;
         case 3:
             //extras
+            menuflag = 0;
             break;
         case 4:
             //quit
             window->close();
+            break;
+        case 5:
+            //game summary
+            menu_draw();
+            if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code = sf::Keyboard::RControl) {
+                    menuflag = 0;
+                    reset();
+                }
+            }
+
+            break;
+        case 6:
+            //play
+            tasking(event);
+            
             break;
         }
         window->display();
@@ -1654,12 +2085,80 @@ void Game::menu_draw() {
         window->draw(title);
         window->draw(table_screen);
         
+
+
+        break;
+
+    case 5:
+        window->draw(menu_background);
+        //window->draw(title);
+        sf::Text* winner = new sf::Text;
+        sf::Text* points_t1 = new sf::Text;
+        sf::Text* points_t2 = new sf::Text;
+        sf::Text* amazing = new sf::Text;
+        sf::Text* continu = new sf::Text;
+        int win = 2;
+        if (points[0] > points[1]) {
+            win = 1;
+        }
+        continu->setFont(this->font);
+        continu->setCharacterSize(40);
+        continu->setString("PRESS RIGHT CONTROL TO CONTINUE");
+        continu->setOutlineColor(sf::Color::Black);
+        continu->setOutlineThickness(1);
+        continu->setPosition(sf::Vector2f(1200, 960));
+        amazing->setFont(this->font);
+        amazing->setCharacterSize(80);
+        amazing->setString("AMAZING GAME");
+        amazing->setOutlineColor(sf::Color::Black);
+        amazing->setOutlineThickness(1.2);
+        amazing->setPosition(sf::Vector2f(600,30));
+        winner->setFont(this->font);
+        winner->setString("AND THE WINNER IS - TEAM " + std::to_string(win));
+        winner->setCharacterSize(80);
+        winner->setOutlineColor(sf::Color::Red);
+        winner->setOutlineThickness(1);
+        winner->setPosition(sf::Vector2f(150, 300));
+        points_t1->setFont(this->font);
+        points_t1->setString("TEAM 1 - " + std::to_string(points[0]));
+        points_t1->setCharacterSize(60);
+        points_t1->setOutlineColor(sf::Color::Black);
+        points_t1->setOutlineThickness(1);
+        points_t1->setPosition(sf::Vector2f(150, 400 + (win-1) * 150));
+        points_t2->setFont(this->font);
+        points_t2->setString("TEAM 2 - " + std::to_string(points[1]));
+        points_t2->setCharacterSize(60);
+        points_t2->setOutlineColor(sf::Color::Black);
+        points_t2->setOutlineThickness(1);
+        points_t2->setPosition(sf::Vector2f(150, 400 + (2-win) * 150));
+        window->draw(*winner);
+        window->draw(*points_t1);
+        window->draw(*points_t2);
+        window->draw(*amazing);
+        window->draw(*continu);
+
+
+
+
+
+
+        delete continu;
+        delete amazing;
+        delete winner;
+        delete points_t1;
+        delete points_t2;
         break;
     }
 }
 
 void Game::text_select(sf::Event& event) {
-    if (mouse_delay.getElapsedTime().asSeconds() > 0.05) {
+    sf::RectangleShape* test = new sf::RectangleShape;
+    test->setSize(sf::Vector2f(50, 50));
+    test->setFillColor(sf::Color::Red);
+    test->setPosition(sf::Vector2f(300, testowa));
+  
+   
+    if (mouse_delay.getElapsedTime().asSeconds() > 0) {
         if (event.type == sf::Event::MouseMoved) {
 
             float mouse_pos_x = sf::Mouse::getPosition(*window).x;
@@ -1685,10 +2184,137 @@ void Game::text_select(sf::Event& event) {
         else if (event.type == sf::Event::MouseButtonPressed) {
             if (event.key.code == sf::Mouse::Left) {
                 menuflag = menu_text_counter + 1;
+               // menuflag = 5;
             }
+        }
+        else if (event.type == sf::Event::MouseWheelScrolled) {
+            
+            testowa -= 1*event.mouseWheelScroll.delta;
+            //std::cout << event.mouseWheelScroll.delta <<"  " << "\n";
+           
+            
         }
         mouse_delay.restart();
     }
+    window->draw(*test);
+    delete test;
+}
+
+void Game::players_choice(sf::Event& event) {
+   
+    window->draw(menu_background);
+    window->draw(title);
+    sf::Text* num_choice = new sf::Text;
+    sf::Text* two = new sf::Text;
+    sf::Text* four = new sf::Text;
+    num_choice->setFont(this->font);
+    num_choice->setCharacterSize(60);
+    num_choice->setString("CHOOSE THE NUMBER OF PLAYERS");
+    num_choice->setOutlineColor(sf::Color::Black);
+    num_choice->setOutlineThickness(1.5);
+    num_choice->setPosition(sf::Vector2f(550, 230));
+    two->setFont(this->font);
+    two->setCharacterSize(120);
+    two->setString("2");
+    two->setOutlineColor(sf::Color::Red);
+    two->setOutlineThickness(2);
+    two->setPosition(sf::Vector2f(500, 500));
+    four->setFont(this->font);
+    four->setCharacterSize(120);
+    four->setString("4");
+    four->setOutlineColor(sf::Color::Red);
+    four->setOutlineThickness(2);
+    four->setPosition(sf::Vector2f(1300, 500));
+    
+    
+        if (event.type == sf::Event::MouseMoved) {
+
+            float mouse_pos_x = sf::Mouse::getPosition(*window).x;
+            float mouse_pos_y = sf::Mouse::getPosition(*window).y;
+
+            if (mouse_pos_y > two->getPosition().y && mouse_pos_y < two->getPosition().y + 120) {
+                if (mouse_pos_x > two->getPosition().x && mouse_pos_x < two->getPosition().x + 80) {
+                    two->setCharacterSize(160);
+                    two->setFillColor(sf::Color::Cyan);
+                    number_players = 2;
+                }
+                else if (mouse_pos_x > four->getPosition().x && mouse_pos_x < four->getPosition().x + 80) {
+                    four->setCharacterSize(160);
+                    four->setFillColor(sf::Color::Cyan);
+                    number_players = 4;
+                }
+            }
+
+
+        }
+        else if (event.type == sf::Event::MouseButtonPressed) {
+            if (mouse_delay.getElapsedTime().asSeconds() > 0.4) {
+                if (event.key.code == sf::Mouse::Left) {
+                    //start of the game
+                    start_new_game();
+                    //menu flag inside
+                    mouse_delay.restart();
+                }
+
+
+            }
+        
+    }
+        
+
+
+    window->draw(*num_choice);
+    window->draw(*two);
+    window->draw(*four);
+
+    delete two;
+    delete four;
+    delete num_choice;
+}
+
+void Game::start_new_game() {
+    //reset
+    global_player_pointer = 0;
+    player_pointer = 0;
+    delete[] players;
+    points[0] = 0;
+    points[1] = 0;
+    deck.clear();
+    discarded.clear();
+    std::cout << "discarded PRZESZLO";
+    thirds[0].clear();
+    thirds[1].clear();
+    std::cout << "thirds PRZESZLO";
+    closed_interface[0].clear();
+    closed_interface[1].clear();
+    std::cout << "CLOSEDinterace PRZESZLO";
+    closed[0].clear();
+    closed[1].clear();
+    std::cout << "CLOSED PRZESZLO";
+    playfield[0].clear();
+    playfield[1].clear();
+    std::cout << "PFIELD PRZESZLO";
+    key_bools.block = false;
+    key_bools.playfield_confirmed[0] = false;
+    key_bools.playfield_confirmed[1] = false;
+    key_bools.points_thresholds[0] = 50;
+    key_bools.points_thresholds[1] = 50;
+    std::cout << "keybools przeszlo";
+    //start new game
+    players = new Player[number_players];
+    for (int i = 0; i < number_players; i++) {
+
+        if (number_players == 2) {
+            players[i] = Player(deck, discarded, playfield, thirds, closed, i, true, key_bools, cards_texture);
+        }
+        else {
+            players[i] = Player(deck, discarded, playfield, thirds, closed, i, false, key_bools, cards_texture);
+        }
+    }
+    std::cout << "playery przeszly";
+    start();
+    std::cout << "start";
+    menuflag = 6;
 }
 
 void Game::gameloop() {
